@@ -1,4 +1,4 @@
-package com.mygreatcompany.batm.server.extensions.myfirstextension;
+package com.budgetcoinz.batm.server.extensions;
 
 import com.generalbytes.batm.server.extensions.IExtensionContext;
 import com.generalbytes.batm.server.extensions.ITransactionDetails;
