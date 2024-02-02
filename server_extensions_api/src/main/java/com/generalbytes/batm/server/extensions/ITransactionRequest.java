@@ -1,5 +1,5 @@
 /*************************************************************************************
- * Copyright (C) 2014-2020 GENERAL BYTES s.r.o. All rights reserved.
+ * Copyright (C) 2014-2024 GENERAL BYTES s.r.o. All rights reserved.
  *
  * This software may be distributed and modified under the terms of the GNU
  * General Public License version 2 (GPL2) as published by the Free Software
@@ -17,8 +17,11 @@
  ************************************************************************************/
 package com.generalbytes.batm.server.extensions;
 
+import com.generalbytes.batm.server.extensions.questionnaire.QuestionnaireResult;
+
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 public interface ITransactionRequest {
 
@@ -156,8 +159,24 @@ public interface ITransactionRequest {
      */
     BigDecimal getDiscountQuotient();
 
+    /**
+     * Returns questionnaire results if any questionnaire has been activated.
+     *
+     * @return List of {@link QuestionnaireResult}. Can be null.
+     */
+    List<QuestionnaireResult> getQuestionnaireResults();
+
+    /**
+     * Error message displayed to the customer.
+     *
+     * @return Error message.
+     */
+    String getErrorMessage();
 
 
-
+    /**
+     * Error message displayed to the customer.
+     */
+    void setErrorMessage(String errorMessage);
 
 }
