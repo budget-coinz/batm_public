@@ -24,12 +24,19 @@ public class ExtensionRestResponse {
     int resultCode;
     String message;
 
+    Object data;
     public ExtensionRestResponse() {
     }
 
     public ExtensionRestResponse(int resultCode, String message) {
         this.resultCode = resultCode;
         this.message = message;
+    }
+
+    public ExtensionRestResponse(int resultCode, String message, Object data) {
+        this.resultCode = resultCode;
+        this.message = message;
+        this.data = data;
     }
 
     public int getResultCode() {
@@ -46,6 +53,14 @@ public class ExtensionRestResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
     }
 
     @Override

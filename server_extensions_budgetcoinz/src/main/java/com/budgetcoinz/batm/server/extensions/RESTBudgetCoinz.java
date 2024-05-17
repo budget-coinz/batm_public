@@ -19,7 +19,7 @@ package com.budgetcoinz.batm.server.extensions;
 
 import com.budgetcoinz.batm.server.extensions.features.BudgetCoinzExtension;
 import com.budgetcoinz.batm.server.extensions.shared.ExtensionRestResponse;
-import com.budgetcoinz.batm.server.extensions.shared.IdentityPiece;
+import com.budgetcoinz.batm.server.extensions.shared.IdentityPieceBc;
 import com.generalbytes.batm.server.extensions.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +93,7 @@ public class RESTBudgetCoinz {
 
         ctx.addIdentityPiece(
             identity.getPublicId(),
-            IdentityPiece.fromPersonalInfo(firstName,
+            IdentityPieceBc.fromPersonalInfo(firstName,
                 lastName,
                 "",
                 IIdentityPiece.DOCUMENT_TYPE_ID_CARD,
@@ -109,7 +109,7 @@ public class RESTBudgetCoinz {
                 "123-45-6789")
         );
 
-        ctx.addIdentityPiece(identity.getPublicId(), IdentityPiece.fromPhoneNumber("+15861234567"));
+        ctx.addIdentityPiece(identity.getPublicId(), IdentityPieceBc.fromPhoneNumber("+15861234567"));
 
         return ctx.findIdentityByIdentityId(identity.getPublicId());
     }

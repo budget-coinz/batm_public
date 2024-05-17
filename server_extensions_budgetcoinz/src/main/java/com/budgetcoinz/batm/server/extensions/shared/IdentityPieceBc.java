@@ -22,7 +22,7 @@ import com.generalbytes.batm.server.extensions.IPerson;
 
 import java.util.Date;
 
-public class IdentityPiece implements IIdentityPiece {
+public class IdentityPieceBc implements IIdentityPiece {
 
     private final int type;
     private final String phoneNumber;
@@ -45,9 +45,9 @@ public class IdentityPiece implements IIdentityPiece {
     private final String occupation;
     private final String ssn;
 
-    IdentityPiece(int type, String phoneNumber, String emailAddress, String firstName, String lastName, String idCardNumber, Integer documentType, Date documentValidTo,
-                  String contactZIP, String contactCountry, String contactCountryIso2, String contactProvince, String contactCity, String contactAddress, Date dateOfBirth, String occupation, String ssn,
-                  String fileName, String mimeType, byte[] data) {
+    IdentityPieceBc(int type, String phoneNumber, String emailAddress, String firstName, String lastName, String idCardNumber, Integer documentType, Date documentValidTo,
+                    String contactZIP, String contactCountry, String contactCountryIso2, String contactProvince, String contactCity, String contactAddress, Date dateOfBirth, String occupation, String ssn,
+                    String fileName, String mimeType, byte[] data) {
         this.type = type;
         this.phoneNumber = phoneNumber;
         this.emailAddress = emailAddress;
@@ -70,32 +70,32 @@ public class IdentityPiece implements IIdentityPiece {
         this.ssn = ssn;
     }
 
-    public static IdentityPiece fromEmailAddress(String emailAddress) {
-        return new IdentityPiece(TYPE_EMAIL, null, emailAddress, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+    public static IdentityPieceBc fromEmailAddress(String emailAddress) {
+        return new IdentityPieceBc(TYPE_EMAIL, null, emailAddress, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
-    public static IdentityPiece fromSelfie(String mimeType, byte[] data) {
-        return new IdentityPiece(TYPE_SELFIE, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data);
+    public static IdentityPieceBc fromSelfie(String mimeType, byte[] data) {
+        return new IdentityPieceBc(TYPE_SELFIE, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data);
     }
 
-    public static IdentityPiece fromCameraImage(String mimeType, byte[] data) {
-        return new IdentityPiece(TYPE_CAMERA_IMAGE, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data);
+    public static IdentityPieceBc fromCameraImage(String mimeType, byte[] data) {
+        return new IdentityPieceBc(TYPE_CAMERA_IMAGE, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data);
     }
 
-    public static IdentityPiece fromFingerprint(byte[] data) {
-        return new IdentityPiece(TYPE_FINGERPRINT, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, data);
+    public static IdentityPieceBc fromFingerprint(byte[] data) {
+        return new IdentityPieceBc(TYPE_FINGERPRINT, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, data);
     }
 
-    public static IdentityPiece fromIdScan(String mimeType, byte[] data) {
-        return new IdentityPiece(TYPE_ID_SCAN, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data);
+    public static IdentityPieceBc fromIdScan(String mimeType, byte[] data) {
+        return new IdentityPieceBc(TYPE_ID_SCAN, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data);
     }
 
-    public static IdentityPiece fromPhoneNumber(String phoneNumber) {
-        return new IdentityPiece(TYPE_CELLPHONE, phoneNumber, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+    public static IdentityPieceBc fromPhoneNumber(String phoneNumber) {
+        return new IdentityPieceBc(TYPE_CELLPHONE, phoneNumber, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
-    public static IdentityPiece fromPersonalInfo(String firstName, String lastName, String idCardNumber, int documentType, Date documentValidTo, String contactZIP, String contactCountry, String contactCountryIso2, String contactProvince, String contactCity, String contactAddress, Date dateOfBirth, String occupation, String ssn) {
-        return new IdentityPiece(TYPE_PERSONAL_INFORMATION, null, null, firstName, lastName, idCardNumber, documentType, documentValidTo, contactZIP, contactCountry, contactCountryIso2, contactProvince, contactCity, contactAddress, dateOfBirth, occupation, ssn, null, null, null);
+    public static IdentityPieceBc fromPersonalInfo(String firstName, String lastName, String idCardNumber, int documentType, Date documentValidTo, String contactZIP, String contactCountry, String contactCountryIso2, String contactProvince, String contactCity, String contactAddress, Date dateOfBirth, String occupation, String ssn) {
+        return new IdentityPieceBc(TYPE_PERSONAL_INFORMATION, null, null, firstName, lastName, idCardNumber, documentType, documentValidTo, contactZIP, contactCountry, contactCountryIso2, contactProvince, contactCity, contactAddress, dateOfBirth, occupation, ssn, null, null, null);
     }
 
     @Override
