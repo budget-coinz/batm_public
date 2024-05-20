@@ -66,11 +66,11 @@ public class TerminalRestService {
     public Object helloWorld(@QueryParam("apiKey") String apiKey, @PathParam("serialNumber") String serialNumber) {
         log.debug("GET /terminal/{serialNumber} Called");
 
-        ITerminal terminal = ctx.findTerminalBySerialNumber(serialNumber);
-
         if(!canAccess(apiKey)){
             return invalidApiKey;
         }
+
+        ITerminal terminal = ctx.findTerminalBySerialNumber(serialNumber);
 
         if(terminal == null){
             return new ExtensionRestResponse(500, String.format("Invalid Serial Number %s", serialNumber));

@@ -44,10 +44,11 @@ public class IdentityPieceBc implements IIdentityPiece {
     private final Date dateOfBirth;
     private final String occupation;
     private final String ssn;
+    private final Date created;
 
     IdentityPieceBc(int type, String phoneNumber, String emailAddress, String firstName, String lastName, String idCardNumber, Integer documentType, Date documentValidTo,
                     String contactZIP, String contactCountry, String contactCountryIso2, String contactProvince, String contactCity, String contactAddress, Date dateOfBirth, String occupation, String ssn,
-                    String fileName, String mimeType, byte[] data) {
+                    String fileName, String mimeType, byte[] data, Date created) {
         this.type = type;
         this.phoneNumber = phoneNumber;
         this.emailAddress = emailAddress;
@@ -68,34 +69,59 @@ public class IdentityPieceBc implements IIdentityPiece {
         this.data = data;
         this.occupation = occupation;
         this.ssn = ssn;
+        this.created = created;
     }
 
     public static IdentityPieceBc fromEmailAddress(String emailAddress) {
-        return new IdentityPieceBc(TYPE_EMAIL, null, emailAddress, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        return new IdentityPieceBc(TYPE_EMAIL, null, emailAddress, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public static IdentityPieceBc fromSelfie(String mimeType, byte[] data) {
-        return new IdentityPieceBc(TYPE_SELFIE, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data);
+        return new IdentityPieceBc(TYPE_SELFIE, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data, null);
     }
 
     public static IdentityPieceBc fromCameraImage(String mimeType, byte[] data) {
-        return new IdentityPieceBc(TYPE_CAMERA_IMAGE, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data);
+        return new IdentityPieceBc(TYPE_CAMERA_IMAGE, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data,null);
     }
 
     public static IdentityPieceBc fromFingerprint(byte[] data) {
-        return new IdentityPieceBc(TYPE_FINGERPRINT, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, data);
+        return new IdentityPieceBc(TYPE_FINGERPRINT, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, data,null);
     }
 
     public static IdentityPieceBc fromIdScan(String mimeType, byte[] data) {
-        return new IdentityPieceBc(TYPE_ID_SCAN, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data);
+        return new IdentityPieceBc(TYPE_ID_SCAN, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, mimeType, data,null);
     }
 
     public static IdentityPieceBc fromPhoneNumber(String phoneNumber) {
-        return new IdentityPieceBc(TYPE_CELLPHONE, phoneNumber, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        return new IdentityPieceBc(TYPE_CELLPHONE, phoneNumber, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,null);
     }
 
     public static IdentityPieceBc fromPersonalInfo(String firstName, String lastName, String idCardNumber, int documentType, Date documentValidTo, String contactZIP, String contactCountry, String contactCountryIso2, String contactProvince, String contactCity, String contactAddress, Date dateOfBirth, String occupation, String ssn) {
-        return new IdentityPieceBc(TYPE_PERSONAL_INFORMATION, null, null, firstName, lastName, idCardNumber, documentType, documentValidTo, contactZIP, contactCountry, contactCountryIso2, contactProvince, contactCity, contactAddress, dateOfBirth, occupation, ssn, null, null, null);
+        return new IdentityPieceBc(TYPE_PERSONAL_INFORMATION, null, null, firstName, lastName, idCardNumber, documentType, documentValidTo, contactZIP, contactCountry, contactCountryIso2, contactProvince, contactCity, contactAddress, dateOfBirth, occupation, ssn, null, null, null,null);
+    }
+
+    public static IdentityPieceBc fromSsn(String ssn, IIdentityPiece identityPiece){
+        return new IdentityPieceBc(identityPiece.getPieceType(),
+            identityPiece.getPhoneNumber(),
+            identityPiece.getEmailAddress(),
+            identityPiece.getFirstname(),
+            identityPiece.getLastname(),
+            identityPiece.getIdCardNumber(),
+            identityPiece.getDocumentType(),
+            identityPiece.getDocumentValidTo(),
+            identityPiece.getContactZIP(),
+            identityPiece.getContactCountry(),
+            identityPiece.getContactCountryIso2(),
+            identityPiece.getContactProvince(),
+            identityPiece.getContactCity(),
+            identityPiece.getContactAddress(),
+            identityPiece.getDateOfBirth(),
+            identityPiece.getOccupation(),
+            ssn,
+            identityPiece.getFilename(),
+            identityPiece.getMimeType(),
+            identityPiece.getData(),
+            identityPiece.getCreated());
     }
 
     @Override
@@ -105,7 +131,7 @@ public class IdentityPieceBc implements IIdentityPiece {
 
     @Override
     public Date getCreated() {
-        return null;
+        return created;
     }
 
     @Override

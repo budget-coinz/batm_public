@@ -1,16 +1,26 @@
 package com.budgetcoinz.batm.server.extensions.rest.identity;
 
 import com.budgetcoinz.batm.server.extensions.rest.BudgetCoinzRestExtension;
+import com.budgetcoinz.batm.server.extensions.rest.identity.models.IdentityUpdateModel;
+import com.budgetcoinz.batm.server.extensions.rest.location.models.LocationCreateModel;
 import com.budgetcoinz.batm.server.extensions.shared.ExtensionRestResponse;
+import com.budgetcoinz.batm.server.extensions.shared.IdentityPieceBc;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.generalbytes.batm.server.extensions.ApiAccessType;
 import com.generalbytes.batm.server.extensions.IExtensionContext;
 import com.generalbytes.batm.server.extensions.IIdentity;
+import com.generalbytes.batm.server.extensions.IIdentityPiece;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
+@Path("/")
 public class IdentityRestService {
     protected final Logger log = LoggerFactory.getLogger("batm.master.budgetcoinz.IdentityRestService");
     private final IExtensionContext ctx = BudgetCoinzRestExtension.getExtensionContext();
@@ -20,37 +30,58 @@ public class IdentityRestService {
     @Path("/ssn/update")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Object DeployTerminalToLocation(@HeaderParam("X-Api-Key") String apiKey, @QueryParam("publicId") String publicId, @QueryParam("ssn") String ssn) {
-        log.debug("POST /location/create called");
+    public Object UpdateIdentity(@HeaderParam("X-Api-Key") String apiKey, String data) {
+        log.debug("POST /identity/ssn/update called");
 
         if(!canAccess(apiKey)){
             return invalidApiKey;
         }
 
-        IIdentity identity = ctx.findIdentityByIdentityId(publicId);
+        try{
+            IdentityUpdateModel model = new ObjectMapper().readValue(data, IdentityUpdateModel.class);
 
-        ctx.updateIdentity(identity.getPublicId(),
-            identity.getExternalId(),
-            identity.getState(),
-            identity.getType(),
-            identity.getCreated(),
-            identity.getRegistered(),
-            identity.getVipBuyDiscount(),
-            identity.getVipSellDiscount(),
-            "Identity Updated via CAS REST Extension 'IdentityRestService'. SSN was set to ***-**-" + "1234",
-            identity.getLimitCashPerTransaction(),
-            identity.getLimitCashPerHour(),
-            identity.getLimitCashPerDay(),
-            identity.getLimitCashPerWeek(),
-            identity.getLimitCashPerMonth(),
-            identity.getLimitCashPer3Months(),
-            identity.getLimitCashPer12Months(),
-            identity.getLimitCashPerCalendarQuarter(),
-            identity.getLimitCashPerCalendarYear(),
-            identity.getLimitCashTotalIdentity(),
-            identity.getConfigurationCashCurrency());
+            IIdentity identity = ctx.findIdentityByIdentityId(model.getPublicId());
 
-        return new ExtensionRestResponse(200, "Successfully updated Identity" + publicId, "");
+            List<IIdentityPiece> personalInfoPieces = identity.getIdentityPieces()
+                .stream().filter(piece -> piece.getPieceType() == IIdentityPiece.TYPE_PERSONAL_INFORMATION).collect(Collectors.toList());
+
+            ctx.updateIdentity(identity.getPublicId(),
+                identity.getExternalId(),
+                identity.getState(),
+                identity.getType(),
+                identity.getCreated(),
+                identity.getRegistered(),
+                identity.getVipBuyDiscount(),
+                identity.getVipSellDiscount(),
+                "Identity Updated via CAS REST Extension 'IdentityRestService (/identity/update/ssn)'." + "\n" + "SSN was set to ***-**-" + model.getSsn().substring(model.getSsn().length() -4),
+                identity.getLimitCashPerTransaction(),
+                identity.getLimitCashPerHour(),
+                identity.getLimitCashPerDay(),
+                identity.getLimitCashPerWeek(),
+                identity.getLimitCashPerMonth(),
+                identity.getLimitCashPer3Months(),
+                identity.getLimitCashPer12Months(),
+                identity.getLimitCashPerCalendarQuarter(),
+                identity.getLimitCashPerCalendarYear(),
+                identity.getLimitCashTotalIdentity(),
+                identity.getConfigurationCashCurrency());
+
+            if((long) personalInfoPieces.size() == 1){
+                ctx.updateIdentityPiecePersonalInfo(model.publicId, IdentityPieceBc.fromSsn(model.ssn, personalInfoPieces.get(0)));
+            }else{
+                for(IIdentityPiece piece : personalInfoPieces){
+                    IdentityPieceBc pieceBc = IdentityPieceBc.fromSsn(model.ssn, piece);
+                    ctx.updateIdentityPiecePersonalInfo(model.publicId, pieceBc);
+                }
+            }
+
+            identity = ctx.findIdentityByIdentityId(model.getPublicId());
+
+            return new ExtensionRestResponse(200, "Successfully updated Identity" + model.getPublicId(), identity);
+        }
+        catch(Exception ex){
+            return ex;
+        }
     }
 
     private boolean canAccess(String apiKey){ return ctx.getAPIAccessByKey(apiKey, ApiAccessType.OSW) != null; }
