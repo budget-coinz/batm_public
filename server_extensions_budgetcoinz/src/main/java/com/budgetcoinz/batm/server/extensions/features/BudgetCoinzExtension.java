@@ -27,8 +27,8 @@ public class BudgetCoinzExtension extends AbstractExtension {
         super.init(ctx);
         BudgetCoinzExtension.ctx = ctx;
 
-        log.debug("BudgetCoinz extension initialized. Adding listener");
-        ctx.addTransactionListener(new TransactionListenerImpl(ctx));
+        //log.debug("BudgetCoinz extension initialized. Adding listener");
+        //ctx.addTransactionListener(new TransactionListenerImpl(ctx));
     }
 
     @Override

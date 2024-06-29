@@ -2,10 +2,8 @@ package com.budgetcoinz.batm.server.extensions.rest.identity;
 
 import com.budgetcoinz.batm.server.extensions.rest.BudgetCoinzRestExtension;
 import com.budgetcoinz.batm.server.extensions.rest.identity.models.IdentityUpdateModel;
-import com.budgetcoinz.batm.server.extensions.rest.location.models.LocationCreateModel;
 import com.budgetcoinz.batm.server.extensions.shared.ExtensionRestResponse;
 import com.budgetcoinz.batm.server.extensions.shared.IdentityPieceBc;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.generalbytes.batm.server.extensions.ApiAccessType;
 import com.generalbytes.batm.server.extensions.IExtensionContext;
@@ -16,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,6 +42,9 @@ public class IdentityRestService {
             List<IIdentityPiece> personalInfoPieces = identity.getIdentityPieces()
                 .stream().filter(piece -> piece.getPieceType() == IIdentityPiece.TYPE_PERSONAL_INFORMATION).collect(Collectors.toList());
 
+            String identityNote = "Identity Updated via CAS REST Extension 'IdentityRestService (/identity/update/ssn)'." + "\n" +
+                "SSN was set to ***-**-" + model.getSsn().substring(model.getSsn().length() -4) + "\n" +
+                "Extension was called from Zapier Automation " + model.getAutomation();
             ctx.updateIdentity(identity.getPublicId(),
                 identity.getExternalId(),
                 identity.getState(),
@@ -53,7 +53,7 @@ public class IdentityRestService {
                 identity.getRegistered(),
                 identity.getVipBuyDiscount(),
                 identity.getVipSellDiscount(),
-                "Identity Updated via CAS REST Extension 'IdentityRestService (/identity/update/ssn)'." + "\n" + "SSN was set to ***-**-" + model.getSsn().substring(model.getSsn().length() -4),
+                identityNote,
                 identity.getLimitCashPerTransaction(),
                 identity.getLimitCashPerHour(),
                 identity.getLimitCashPerDay(),
@@ -67,17 +67,17 @@ public class IdentityRestService {
                 identity.getConfigurationCashCurrency());
 
             if((long) personalInfoPieces.size() == 1){
-                ctx.updateIdentityPiecePersonalInfo(model.publicId, IdentityPieceBc.fromSsn(model.ssn, personalInfoPieces.get(0)));
+                ctx.updateIdentityPiecePersonalInfo(model.getPublicId(), IdentityPieceBc.fromSsn(model.getSsn(), personalInfoPieces.get(0)));
             }else{
                 for(IIdentityPiece piece : personalInfoPieces){
-                    IdentityPieceBc pieceBc = IdentityPieceBc.fromSsn(model.ssn, piece);
-                    ctx.updateIdentityPiecePersonalInfo(model.publicId, pieceBc);
+                    IdentityPieceBc pieceBc = IdentityPieceBc.fromSsn(model.getSsn(), piece);
+                    ctx.updateIdentityPiecePersonalInfo(model.getPublicId(), pieceBc);
                 }
             }
 
             identity = ctx.findIdentityByIdentityId(model.getPublicId());
 
-            return new ExtensionRestResponse(200, "Successfully updated Identity" + model.getPublicId(), identity);
+            return new ExtensionRestResponse(200, "Successfully updated Identity " + model.getPublicId(), identity);
         }
         catch(Exception ex){
             return ex;
