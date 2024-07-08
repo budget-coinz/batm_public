@@ -44,7 +44,7 @@ public class LocationRestService {
                 model.getContactAddress(),
                 model.getCity(),
                 model.getCountry(),
-                null,
+                model.getCountry(),
                 model.getProvince(),
                 model.getZip(),
                 model.getDescription(),
