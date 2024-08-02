@@ -1,5 +1,6 @@
 package com.budgetcoinz.batm.server.extensions.rest.location;
 
+import com.budgetcoinz.batm.server.extensions.rest.BaseRestService;
 import com.budgetcoinz.batm.server.extensions.rest.BudgetCoinzRestExtension;
 import com.budgetcoinz.batm.server.extensions.rest.edd.models.EddObject;
 import com.budgetcoinz.batm.server.extensions.rest.location.models.LocationCreateModel;
@@ -20,11 +21,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 
 @Path("/")
-public class LocationRestService {
-
+public class LocationRestService extends BaseRestService {
     protected final Logger log = LoggerFactory.getLogger("batm.master.budgetcoinz.LocationRestService");
-    private final IExtensionContext ctx = BudgetCoinzRestExtension.getExtensionContext();
-    ExtensionRestResponse invalidApiKey = new ExtensionRestResponse(500, "Invalid API KEY");
 
     @POST
     @Path("/create")
@@ -67,7 +65,4 @@ public class LocationRestService {
             return ex;
         }
     }
-
-
-    private boolean canAccess(String apiKey){ return ctx.getAPIAccessByKey(apiKey, ApiAccessType.OSW) != null; }
 }

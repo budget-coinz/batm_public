@@ -1,6 +1,8 @@
 package com.budgetcoinz.batm.server.extensions.rest.identity;
 
+import com.budgetcoinz.batm.server.extensions.rest.BaseRestService;
 import com.budgetcoinz.batm.server.extensions.rest.BudgetCoinzRestExtension;
+import com.budgetcoinz.batm.server.extensions.rest.identity.models.IdentityCreateModel;
 import com.budgetcoinz.batm.server.extensions.rest.identity.models.IdentityUpdateModel;
 import com.budgetcoinz.batm.server.extensions.shared.ExtensionRestResponse;
 import com.budgetcoinz.batm.server.extensions.shared.IdentityPieceBc;
@@ -14,14 +16,15 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Path("/")
-public class IdentityRestService {
+public class IdentityRestService extends BaseRestService {
     protected final Logger log = LoggerFactory.getLogger("batm.master.budgetcoinz.IdentityRestService");
-    private final IExtensionContext ctx = BudgetCoinzRestExtension.getExtensionContext();
-    ExtensionRestResponse invalidApiKey = new ExtensionRestResponse(500, "Invalid API KEY");
 
     @POST
     @Path("/ssn/update")
@@ -84,5 +87,60 @@ public class IdentityRestService {
         }
     }
 
-    private boolean canAccess(String apiKey){ return ctx.getAPIAccessByKey(apiKey, ApiAccessType.OSW) != null; }
+    @POST
+    @Path("/create")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Object RegisterIdentity(@HeaderParam("X-Api-Key") String apiKey, String data){
+        log.debug("POST /identity/create called");
+
+        if(!canAccess(apiKey)){
+            return invalidApiKey;
+        }
+
+        try {
+            IdentityCreateModel model = new ObjectMapper().readValue(data, IdentityCreateModel.class);
+
+            IIdentity identity = ctx.addIdentity(
+                "USD",
+                "BT106938",
+                null,
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                new ArrayList<>(),
+                "Created via Extension from Automation " + model.getAutomation(),
+                IIdentity.STATE_TO_BE_VERIFIED,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                new Date(),
+                new Date(),
+                "en");
+
+            ctx.addIdentityPiece(
+                identity.getPublicId(),
+                IdentityPieceBc.fromPersonalInfo(model.getFirstName(),
+                    model.getLastName(),
+                    "",
+                    IIdentityPiece.DOCUMENT_TYPE_ID_CARD,
+                    null,
+                    null,
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    null,
+                    "",
+                    "")
+            );
+
+            ctx.addIdentityPiece(identity.getPublicId(), IdentityPieceBc.fromPhoneNumber(model.getPhoneNumber()));
+
+            return new ExtensionRestResponse(200, "Successfully registered Identity", ctx.findIdentityByIdentityId(identity.getPublicId()));
+        }catch (Exception ex){
+            return ex;
+        }
+    }
 }
