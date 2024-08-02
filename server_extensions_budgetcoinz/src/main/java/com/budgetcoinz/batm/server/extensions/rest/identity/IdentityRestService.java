@@ -1,14 +1,11 @@
 package com.budgetcoinz.batm.server.extensions.rest.identity;
 
 import com.budgetcoinz.batm.server.extensions.rest.BaseRestService;
-import com.budgetcoinz.batm.server.extensions.rest.BudgetCoinzRestExtension;
 import com.budgetcoinz.batm.server.extensions.rest.identity.models.IdentityCreateModel;
 import com.budgetcoinz.batm.server.extensions.rest.identity.models.IdentityUpdateModel;
 import com.budgetcoinz.batm.server.extensions.shared.ExtensionRestResponse;
 import com.budgetcoinz.batm.server.extensions.shared.IdentityPieceBc;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.generalbytes.batm.server.extensions.ApiAccessType;
-import com.generalbytes.batm.server.extensions.IExtensionContext;
 import com.generalbytes.batm.server.extensions.IIdentity;
 import com.generalbytes.batm.server.extensions.IIdentityPiece;
 import org.slf4j.Logger;
