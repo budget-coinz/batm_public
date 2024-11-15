@@ -1,5 +1,5 @@
 /*************************************************************************************
- * Copyright (C) 2014-2020 GENERAL BYTES s.r.o. All rights reserved.
+ * Copyright (C) 2014-2024 GENERAL BYTES s.r.o. All rights reserved.
  *
  * This software may be distributed and modified under the terms of the GNU
  * General Public License version 2 (GPL2) as published by the Free Software
@@ -16,6 +16,8 @@
  *
  ************************************************************************************/
 package com.generalbytes.batm.server.extensions;
+
+import com.generalbytes.batm.server.extensions.watchlist.WatchListScanIdentityMatchesData;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -293,6 +295,13 @@ public interface INotificationListener {
      */
     default void watchlistScanIdentityMatches(String identityPublicId) {}
 
+    /**
+     * Triggered if there is a match on the WatchList with the Identity. Contains detailed information.
+     *
+     * @param data Object containing detailed information about match result.
+     */
+    default void watchlistScanIdentityMatches(WatchListScanIdentityMatchesData data) {}
+
     default void lifetimeIdentityVolumeReached(String terminalSerialNumber, BigDecimal lifetimeVolume, String cashCurrency, BigDecimal preConditionAmount, String identityPublicId) {}
 
     default void transactionSupplyLimitReached(String terminalSerialNumber) {}
@@ -328,4 +337,11 @@ public interface INotificationListener {
 
     default void verificationProviderDeclined(String terminalSerialNumber, String identityPublicId) {}
 
+    /**
+     * Notification triggered when a used exchange pair is not available.
+     *
+     * @param fromCurrency Source currency in the exchange pair.
+     * @param toCurrency Destination currency in the exchange pair.
+     */
+    default void exchangePairNotAvailable(String fromCurrency, String toCurrency) {}
 }
