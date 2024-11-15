@@ -44,9 +44,7 @@ public class IdentityRestService extends BaseRestService {
 
             String identityNote = "Identity Updated via CAS REST Extension 'IdentityRestService (/identity/update/ssn)'." + "\n" +
                 "SSN was set to ***-**-" + model.getSsn().substring(model.getSsn().length() -4) + "\n" +
-                "Occupation was set to " + model.getOccupation() + "\n" +
                 "Extension was called from Zapier Automation " + model.getAutomation();
-
             ctx.updateIdentity(identity.getPublicId(),
                 identity.getExternalId(),
                 identity.getState(),
@@ -69,11 +67,10 @@ public class IdentityRestService extends BaseRestService {
                 identity.getConfigurationCashCurrency());
 
             if((long) personalInfoPieces.size() == 1){
-                ctx.updateIdentityPiecePersonalInfo(model.getPublicId(),
-                    IdentityPieceBc.fromSsnAndOccupation(model.getSsn(), model.getOccupation(), personalInfoPieces.get(0)));
+                ctx.updateIdentityPiecePersonalInfo(model.getPublicId(), IdentityPieceBc.fromSsn(model.getSsn(), personalInfoPieces.get(0)));
             }else{
                 for(IIdentityPiece piece : personalInfoPieces){
-                    IdentityPieceBc pieceBc = IdentityPieceBc.fromSsnAndOccupation(model.getSsn(), model.getOccupation(), piece);
+                    IdentityPieceBc pieceBc = IdentityPieceBc.fromSsn(model.getSsn(), piece);
                     ctx.updateIdentityPiecePersonalInfo(model.getPublicId(), pieceBc);
                 }
             }
@@ -83,7 +80,7 @@ public class IdentityRestService extends BaseRestService {
             return new ExtensionRestResponse(200, "Successfully updated Identity " + model.getPublicId(), identity);
         }
         catch(Exception ex){
-            return invalidRequest(ex.getMessage());
+            return ex;
         }
     }
 

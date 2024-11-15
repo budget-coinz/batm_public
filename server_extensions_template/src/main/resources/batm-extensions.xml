@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extensions>
-    <extension class="com.budgetcoinz.batm.server.extensions.features.BudgetCoinzListenersExtension" />
+    <extension class="com.budgetcoinz.batm.server.extensions.features.BudgetCoinzExtension" />
 </extensions>
