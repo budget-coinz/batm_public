@@ -100,7 +100,7 @@ public class IdentityPieceBc implements IIdentityPiece {
         return new IdentityPieceBc(TYPE_PERSONAL_INFORMATION, null, null, firstName, lastName, idCardNumber, documentType, documentValidTo, contactZIP, contactCountry, contactCountryIso2, contactProvince, contactCity, contactAddress, dateOfBirth, occupation, ssn, null, null, null,null);
     }
 
-    public static IdentityPieceBc fromSsn(String ssn, IIdentityPiece identityPiece){
+    public static IdentityPieceBc fromSsnAndOccupation(String ssn, String occupation, IIdentityPiece identityPiece){
         return new IdentityPieceBc(identityPiece.getPieceType(),
             identityPiece.getPhoneNumber(),
             identityPiece.getEmailAddress(),
@@ -116,7 +116,7 @@ public class IdentityPieceBc implements IIdentityPiece {
             identityPiece.getContactCity(),
             identityPiece.getContactAddress(),
             identityPiece.getDateOfBirth(),
-            identityPiece.getOccupation(),
+            occupation,
             ssn,
             identityPiece.getFilename(),
             identityPiece.getMimeType(),

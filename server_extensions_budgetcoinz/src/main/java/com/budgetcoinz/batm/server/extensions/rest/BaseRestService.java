@@ -7,6 +7,11 @@ import com.generalbytes.batm.server.extensions.IExtensionContext;
 public class BaseRestService {
     public final IExtensionContext ctx = BudgetCoinzRestExtension.getExtensionContext();
     public ExtensionRestResponse invalidApiKey = new ExtensionRestResponse(500, "Invalid API KEY");
+
+    public ExtensionRestResponse invalidRequest(String data){
+        return new ExtensionRestResponse(500, "Invalid Request", data);
+    }
+
     public boolean canAccess(String apiKey){
         return ctx.getAPIAccessByKey(apiKey, ApiAccessType.OSW) != null;
     }
