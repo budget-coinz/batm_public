@@ -4,6 +4,7 @@ public class IdentityUpdateModel {
     private String publicId;
     private String ssn;
     private String automation;
+    private String occupation;
 
     public String getPublicId() {
         return publicId;
@@ -14,4 +15,5 @@ public class IdentityUpdateModel {
     public String getAutomation() {
         return automation;
     }
+    public String getOccupation() { return occupation; }
 }

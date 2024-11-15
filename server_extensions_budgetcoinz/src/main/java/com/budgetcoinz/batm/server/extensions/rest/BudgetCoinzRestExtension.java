@@ -1,5 +1,6 @@
 package com.budgetcoinz.batm.server.extensions.rest;
 
+import com.budgetcoinz.batm.server.extensions.RESTBudgetCoinz;
 import com.budgetcoinz.batm.server.extensions.rest.edd.EddRestService;
 import com.budgetcoinz.batm.server.extensions.rest.identity.IdentityRestService;
 import com.budgetcoinz.batm.server.extensions.rest.location.LocationRestService;
@@ -19,7 +20,7 @@ public class BudgetCoinzRestExtension extends AbstractExtension {
 
     @Override
     public String getName() {
-        return "BudgetCoinz REST Extensions";
+        return "BudgetCoinz REST Extension";
     }
 
 
@@ -76,6 +77,19 @@ public class BudgetCoinzRestExtension extends AbstractExtension {
 
             @Override
             public Class getImplementation() { return IdentityRestService.class; }
+        });
+
+        services.add(new IRestService() {
+            @Override
+            public String getPrefixPath() {
+                return "example";
+            }
+
+            @Override
+            public Class getImplementation() {
+                return RESTBudgetCoinz.class;
+            }
+
         });
 
         return services;
