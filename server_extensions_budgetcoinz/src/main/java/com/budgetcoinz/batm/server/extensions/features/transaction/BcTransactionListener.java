@@ -14,14 +14,13 @@ public class BcTransactionListener implements ITransactionListener {
     public BcTransactionListener(IExtensionContext ctx) {
         this.ctx = ctx;
     }
-
     @Override
     public OutputQueueInsertConfig overrideOutputQueueInsertConfig(ITransactionQueueRequest transactionQueueRequest, OutputQueueInsertConfig outputQueueInsertConfig) {
         log.debug("BcTransactionListener entered for transaction " + transactionQueueRequest.getRemoteTransactionId());
 
         if(isStateMinnesota(transactionQueueRequest)){
             log.debug("State is Minnessota, checking to see if is new customer");
-            if(isNewCustomer(transactionQueueRequest.getIdentityPublicId())){
+            if(isNewMinnesotaCustomer(transactionQueueRequest.getIdentityPublicId())){
 
                 log.debug("Customer is new " + transactionQueueRequest.getIdentityPublicId());
                 Date currentDate = new Date();
@@ -36,13 +35,16 @@ public class BcTransactionListener implements ITransactionListener {
                 outputQueueInsertConfig.setInsertIntoSecondaryQueue(true);
             }
         }
+        else if(isGeneralNewCustomer(transactionQueueRequest.getIdentityPublicId()))
+        {
+            log.debug("State is NOT Minnessota and customer is new, inserting transaction into secondary queue");
+            outputQueueInsertConfig.setInsertIntoSecondaryQueue(true);
+        }
 
         return outputQueueInsertConfig;
     }
 
-
-
-    boolean isStateMinnesota(ITransactionQueueRequest transactionQueueRequest){
+    private boolean isStateMinnesota(ITransactionQueueRequest transactionQueueRequest){
         ITerminal terminal = ctx.findTerminalBySerialNumber(transactionQueueRequest.getTerminalSerialNumber());
 
         if(terminal.getLocation().getProvince().equals("MN")){
@@ -52,12 +54,12 @@ public class BcTransactionListener implements ITransactionListener {
         return false;
     }
 
-    boolean isNewCustomer(String identityPublicId){
+    private boolean isNewMinnesotaCustomer(String identityPublicId){
         List<ITransactionDetails> transactions = ctx.findAllTransactionsByIdentityId(identityPublicId);
 
         ITransactionDetails earliestTransaction = transactions.stream()
-            .min(Comparator.comparing(ITransactionDetails::getServerTime))
-            .orElse(null);
+                .min(Comparator.comparing(ITransactionDetails::getServerTime))
+                .orElse(null);
 
         if(earliestTransaction != null){
             Date currentTime = new Date();
@@ -67,5 +69,11 @@ public class BcTransactionListener implements ITransactionListener {
         }
 
         return true;
+    }
+
+    private boolean isGeneralNewCustomer(String identityPublicId) {
+        List<ITransactionDetails> transactions = ctx.findAllTransactionsByIdentityId(identityPublicId);
+
+        return transactions.size() <= 1;
     }
 }
