@@ -74,6 +74,9 @@ public class BcTransactionListener implements ITransactionListener {
     private boolean isGeneralNewCustomer(String identityPublicId) {
         List<ITransactionDetails> transactions = ctx.findAllTransactionsByIdentityId(identityPublicId);
 
-        return transactions.size() <= 1;
+        //add the + 1 to count the current transaction being executed in this listener
+        int totalTransactionCount = transactions.size() + 1;
+
+        return totalTransactionCount <= 1;
     }
 }
