@@ -2,24 +2,41 @@ package com.generalbytes.batm.server.extensions.extra.bitcoin.wallets.bitgo.v2;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
-import com.generalbytes.batm.server.extensions.Converters;
 import com.generalbytes.batm.common.currencies.CryptoCurrency;
+import com.generalbytes.batm.server.extensions.Converters;
 import com.generalbytes.batm.server.extensions.ICanSendMany;
+import com.generalbytes.batm.server.extensions.extra.bitcoin.wallets.bitgo.v2.dto.BitGoCoinRequest;
+import com.generalbytes.batm.server.extensions.extra.bitcoin.wallets.bitgo.v2.dto.BitGoSendManyRequest;
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import si.mazi.rescu.RestProxyFactory;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 
-public class BitgoWalletTest {
+
+class BitgoWalletTest {
 
     private static final Logger log = LoggerFactory.getLogger(BitgoWalletTest.class);
 
@@ -41,8 +58,8 @@ public class BitgoWalletTest {
         }
     }
 
-    @BeforeClass
-    public static void setup() {
+    @BeforeEach
+    void setUp() {
         setLoggerLevel("batm", "trace");
         setLoggerLevel("si.mazi.rescu","trace");
 
@@ -60,8 +77,8 @@ public class BitgoWalletTest {
     }
 
     @Test
-    @Ignore
-    public void getCryptAddressTest() {
+    @Disabled
+    void getCryptAddressTest() {
         String coin = CryptoCurrency.TBTC.getCode();
         String scheme = "https";
         String host = "test.bitgo.com";
@@ -72,13 +89,13 @@ public class BitgoWalletTest {
 
         final BitgoWallet remotewallet = new BitgoWallet(scheme, host, port, token, walletId, walletPassphrase, 2);
         final String address = remotewallet.getCryptoAddress(coin);
-        Assert.assertNotNull(address);
-        Assert.assertEquals("2N2WR6aVSEgq5ZLTED9vHvCWFdAMf6yhebd", address);
+        assertNotNull(address);
+        assertEquals("2N2WR6aVSEgq5ZLTED9vHvCWFdAMf6yhebd", address);
     }
 
     @Test
-    @Ignore
-    public void getCryptBalanceTest() {
+    @Disabled
+    void getCryptBalanceTest() {
         String coin = CryptoCurrency.TBTC.getCode();
         String scheme = "https";
         String host = "test.bitgo.com";
@@ -89,13 +106,13 @@ public class BitgoWalletTest {
 
         final BitgoWallet remotewallet = new BitgoWallet(scheme, host, port, token, walletId, walletPassphrase, 2);
         BigDecimal balance = remotewallet.getCryptoBalance(coin);
-        Assert.assertNotNull(balance);
+        assertNotNull(balance);
         log.info("balance = {}", balance);
     }
 
     @Test
-    @Ignore("Local instance of bitgo-express is required to run")
-    public void sendCoinsTest() {
+    @Disabled("Local instance of bitgo-express is required to run")
+    void sendCoinsTest() {
         String destinationAddress = "2N5q4MwNSUxbAtaidhRgkiDrbwVR4yCZDhi";
         String coin = CryptoCurrency.TBTC.getCode();
         Integer amountInt = 10000;
@@ -107,8 +124,8 @@ public class BitgoWalletTest {
     }
 
     @Test
-    @Ignore("Local instance of bitgo-express is required to run")
-    public void sendManyTest() {
+    @Disabled("Local instance of bitgo-express is required to run")
+    void sendManyTest() {
         String coin = CryptoCurrency.TBTC.getCode();
         Integer amountInt = 10000;
         BigDecimal amount = BigDecimal.valueOf(amountInt).divide(Converters.TBTC);
@@ -122,8 +139,8 @@ public class BitgoWalletTest {
     }
 
     @Test
-    @Ignore("Local instance of bitgo-express is required to run")
-    public void sendCoinsNumBlocksTest() {
+    @Disabled("Local instance of bitgo-express is required to run")
+    void sendCoinsNumBlocksTest() {
         String destinationAddress = "2N5q4MwNSUxbAtaidhRgkiDrbwVR4yCZDhi";
         String coin = CryptoCurrency.TBTC.getCode();
         Integer amountInt = 10000;
@@ -135,7 +152,7 @@ public class BitgoWalletTest {
     }
 
     @Test
-    public void convertBalance() {
+    void convertBalance() {
         Assertions.assertThat(wallet.toSatoshis(new BigDecimal("15.50581145"), CryptoCurrency.USDT.getCode())).isEqualTo("15505811");
         Assertions.assertThat(wallet.toSatoshis(new BigDecimal("15.50581145"), CryptoCurrency.USDTTRON.getCode())).isEqualTo("15505811");
 
@@ -151,10 +168,83 @@ public class BitgoWalletTest {
         Assertions.assertThat(wallet.fromSatoshis(CryptoCurrency.BTC.getCode(), new BigDecimal("1.000"))).isEqualByComparingTo("0.00000001");
         Assertions.assertThat(wallet.fromSatoshis(CryptoCurrency.BTC.getCode(), new BigDecimal("1.999"))).isEqualByComparingTo("0.00000001");
 
-        Exception exception = Assert.assertThrows(NullPointerException.class, () -> wallet.fromSatoshis("unknown", BigDecimal.ONE));
+        Exception exception = assertThrows(NullPointerException.class, () -> wallet.fromSatoshis("unknown", BigDecimal.ONE));
         Assertions.assertThat(exception.getMessage()).contains("not supported");
         for (String cryptoCurrency : wallet.getCryptoCurrencies()) {
-            Assert.assertEquals(BigDecimal.ONE, wallet.fromSatoshis(cryptoCurrency, new BigDecimal(wallet.toSatoshis(BigDecimal.ONE, cryptoCurrency))));
+            assertEquals(BigDecimal.ONE, wallet.fromSatoshis(cryptoCurrency, new BigDecimal(wallet.toSatoshis(BigDecimal.ONE, cryptoCurrency))));
         }
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"USDC", "USDT"})
+    void testSendCoins_requestWithType(String cryptocurrency) throws IOException {
+        IBitgoAPI api = mock(IBitgoAPI.class);
+
+        try (MockedStatic<RestProxyFactory> mockedRestProxyFactory = mockStatic(RestProxyFactory.class)) {
+            mockedRestProxyFactory.when(() -> RestProxyFactory.createProxy(eq(IBitgoAPI.class), anyString(), any())).thenReturn(api);
+
+            BitgoWallet bitgoWallet = new BitgoWallet("http", "host", 1234, "token", "walletId", "walletPassphrase", 2);
+            bitgoWallet.sendCoins("destinationAddress", BigDecimal.ONE, cryptocurrency, "description");
+
+            ArgumentCaptor<BitGoCoinRequest> requestCaptor = ArgumentCaptor.forClass(BitGoCoinRequest.class);
+            verify(api).sendCoins(eq(cryptocurrency.toLowerCase()), eq("walletId"), requestCaptor.capture());
+            BitGoCoinRequest request = requestCaptor.getValue();
+            assertEquals("transfer", request.getType());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"BCH", "BTC", "ETH", "LTC", "XRP"})
+    void testSendCoins_requestWithoutType(String cryptocurrency) throws IOException {
+        IBitgoAPI api = mock(IBitgoAPI.class);
+
+        try (MockedStatic<RestProxyFactory> mockedRestProxyFactory = mockStatic(RestProxyFactory.class)) {
+            mockedRestProxyFactory.when(() -> RestProxyFactory.createProxy(eq(IBitgoAPI.class), anyString(), any())).thenReturn(api);
+
+            BitgoWallet bitgoWallet = new BitgoWallet("http", "host", 1234, "token", "walletId", "walletPassphrase", 2);
+            bitgoWallet.sendCoins("destinationAddress", BigDecimal.ONE, cryptocurrency, "description");
+
+            ArgumentCaptor<BitGoCoinRequest> requestCaptor = ArgumentCaptor.forClass(BitGoCoinRequest.class);
+            verify(api).sendCoins(eq(cryptocurrency.toLowerCase()), eq("walletId"), requestCaptor.capture());
+            BitGoCoinRequest request = requestCaptor.getValue();
+            assertNull(request.getType());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"USDC", "USDT"})
+    void testSendMany_requestWithType(String cryptocurrency) throws IOException {
+        IBitgoAPI api = mock(IBitgoAPI.class);
+
+        try (MockedStatic<RestProxyFactory> mockedRestProxyFactory = mockStatic(RestProxyFactory.class)) {
+            mockedRestProxyFactory.when(() -> RestProxyFactory.createProxy(eq(IBitgoAPI.class), anyString(), any())).thenReturn(api);
+
+            BitgoWallet bitgoWallet = new BitgoWallet("http", "host", 1234, "token", "walletId", "walletPassphrase", 2);
+            bitgoWallet.sendMany(List.of(), cryptocurrency, "description");
+
+            ArgumentCaptor<BitGoSendManyRequest> requestCaptor = ArgumentCaptor.forClass(BitGoSendManyRequest.class);
+            verify(api).sendMany(eq(cryptocurrency.toLowerCase()), eq("walletId"), requestCaptor.capture());
+            BitGoSendManyRequest request = requestCaptor.getValue();
+            assertEquals("transfer", request.type);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"BCH", "BTC", "ETH", "LTC", "XRP"})
+    void testSendMany_requestWithoutType(String cryptocurrency) throws IOException {
+        IBitgoAPI api = mock(IBitgoAPI.class);
+
+        try (MockedStatic<RestProxyFactory> mockedRestProxyFactory = mockStatic(RestProxyFactory.class)) {
+            mockedRestProxyFactory.when(() -> RestProxyFactory.createProxy(eq(IBitgoAPI.class), anyString(), any())).thenReturn(api);
+
+            BitgoWallet bitgoWallet = new BitgoWallet("http", "host", 1234, "token", "walletId", "walletPassphrase", 2);
+            bitgoWallet.sendMany(List.of(), cryptocurrency, "description");
+
+            ArgumentCaptor<BitGoSendManyRequest> requestCaptor = ArgumentCaptor.forClass(BitGoSendManyRequest.class);
+            verify(api).sendMany(eq(cryptocurrency.toLowerCase()), eq("walletId"), requestCaptor.capture());
+            BitGoSendManyRequest request = requestCaptor.getValue();
+            assertNull(request.type);
+        }
+    }
+
 }

@@ -19,10 +19,12 @@ package com.generalbytes.batm.server.extensions.extra.bitcoin.wallets.coinbase.v
 
 import com.generalbytes.batm.server.extensions.IGeneratesNewDepositCryptoAddress;
 import com.generalbytes.batm.server.extensions.IQueryableWallet;
+import com.generalbytes.batm.server.extensions.extra.bitcoin.coinbase.api.CoinbaseV2ApiWrapper;
 import com.generalbytes.batm.server.extensions.extra.bitcoin.wallets.coinbase.v2.dto.CBAddress;
 import com.generalbytes.batm.server.extensions.extra.bitcoin.wallets.coinbase.v2.dto.CBBalance;
 import com.generalbytes.batm.server.extensions.extra.bitcoin.wallets.coinbase.v2.dto.CBCreateAddressRequest;
 import com.generalbytes.batm.server.extensions.extra.bitcoin.wallets.coinbase.v2.dto.CBCreateAddressResponse;
+import com.generalbytes.batm.server.extensions.extra.bitcoin.wallets.coinbase.v2.dto.CBNetwork;
 import com.generalbytes.batm.server.extensions.extra.bitcoin.wallets.coinbase.v2.dto.CBTransaction;
 import com.generalbytes.batm.server.extensions.payment.ReceivedAmount;
 import org.slf4j.Logger;
@@ -31,24 +33,24 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class CoinbaseWalletV2WithUniqueAddresses extends CoinbaseWalletV2 implements IGeneratesNewDepositCryptoAddress, IQueryableWallet {
     private static final Logger log = LoggerFactory.getLogger(CoinbaseWalletV2WithUniqueAddresses.class);
 
-    public CoinbaseWalletV2WithUniqueAddresses(String apiKey, String apiSecret, String accountName) {
-        super(apiKey, apiSecret, accountName);
+    public CoinbaseWalletV2WithUniqueAddresses(CoinbaseV2ApiWrapper api, String accountName) {
+        super(api, accountName);
     }
 
     @Override
     public String generateNewDepositCryptoAddress(String cryptoCurrency, String label) {
         if (!getCryptoCurrencies().contains(cryptoCurrency)) {
-            log.error("Wallet supports only " + Arrays.toString(getCryptoCurrencies().toArray()) + " not " + cryptoCurrency);
+            log.error("Wallet supports only {} not {}", Arrays.toString(getCryptoCurrencies().toArray()), cryptoCurrency);
             return null;
         }
         initIfNeeded(cryptoCurrency);
         long timeStamp = getTimestamp();
-        CBCreateAddressResponse addressesResponse = api.createAddress(apiKey, API_VERSION, CBDigest.createInstance(apiSecret, timeStamp), timeStamp, accountIds.get(cryptoCurrency), new CBCreateAddressRequest(label));
+        CBCreateAddressResponse addressesResponse = api.createAddress(API_VERSION, timeStamp, accountIds.get(cryptoCurrency), new CBCreateAddressRequest(label));
         if (addressesResponse != null && addressesResponse.getData() != null) {
             CBAddress address = addressesResponse.getData();
             String network = getNetworkName(cryptoCurrency);
@@ -59,7 +61,7 @@ public class CoinbaseWalletV2WithUniqueAddresses extends CoinbaseWalletV2 implem
             return address.getAddress();
         }
         if (addressesResponse != null && addressesResponse.getErrors() != null) {
-            log.error("generateNewDepositCryptoAddress - " + addressesResponse.getErrorMessages());
+            log.error("generateNewDepositCryptoAddress - {}", addressesResponse.getErrorMessages());
         }
         return null;
     }
@@ -77,7 +79,18 @@ public class CoinbaseWalletV2WithUniqueAddresses extends CoinbaseWalletV2 implem
         log.trace("Received transactions: {}", transactions);
         int confirmations = getConfirmations(transactions);
         BigDecimal amount = getAmount(transactions);
-        return new ReceivedAmount(amount, confirmations);
+        ReceivedAmount receivedAmount = new ReceivedAmount(amount, confirmations);
+        receivedAmount.setTransactionHashes(getTransactionHashes(transactions));
+        return receivedAmount;
+    }
+
+    private List<String> getTransactionHashes(List<CBTransaction> transactions) {
+        return transactions.stream()
+            .map(CBTransaction::getNetwork)
+            .filter(Objects::nonNull)
+            .map(CBNetwork::getHash)
+            .filter(hash -> hash != null && !hash.isBlank())
+            .toList();
     }
 
     private BigDecimal getAmount(List<CBTransaction> transactions) {
@@ -101,10 +114,9 @@ public class CoinbaseWalletV2WithUniqueAddresses extends CoinbaseWalletV2 implem
     private List<CBTransaction> getReceivedTransactions(String addressId, String cryptoCurrency) {
         return getTransactions(addressId, cryptoCurrency).stream()
             .filter(t -> "send".equals(t.getType()))
-            .filter(t -> "pending".equals(t.getStatus())
-                || "completed".equals(t.getStatus()))
+            .filter(t -> "pending".equals(t.getStatus()) || "completed".equals(t.getStatus()))
             .filter(t -> t.getAmount() != null && t.getAmount().getCurrency().equals(cryptoCurrency))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private String getAddressId(String address, String cryptoCurrency) {
@@ -118,18 +130,16 @@ public class CoinbaseWalletV2WithUniqueAddresses extends CoinbaseWalletV2 implem
     private List<CBTransaction> getTransactions(String addressId, String cryptoCurrency) {
         return paginate(startingAfter -> {
             long timeStamp = getTimestamp();
-            CBDigest digest = CBDigest.createInstance(apiSecret, timeStamp);
             String accountId = accountIds.get(cryptoCurrency);
-            return api.getAddressTransactions(apiKey, API_VERSION, digest, timeStamp, accountId, addressId, 100, startingAfter);
+            return api.getAddressTransactions(API_VERSION, timeStamp, accountId, addressId, 100, startingAfter);
         });
     }
 
     private List<CBAddress> getAddresses(String cryptoCurrency) {
         return paginate(startingAfter -> {
             long timeStamp = getTimestamp();
-            CBDigest digest = CBDigest.createInstance(apiSecret, timeStamp);
             String accountId = accountIds.get(cryptoCurrency);
-            return api.getAddresses(apiKey, API_VERSION, digest, timeStamp, accountId, 100, startingAfter);
+            return api.getAddresses(API_VERSION, timeStamp, accountId, 100, startingAfter);
         });
     }
 }

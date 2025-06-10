@@ -45,6 +45,7 @@
                 <cryptocurrency buyonly="true">ETH</cryptocurrency><!--BitGo’s Ethereum wallets are only available to BitGo Enterprise customers-->
                 <cryptocurrency>XRP</cryptocurrency><!-- BitGo Enterprise-->
                 <cryptocurrency buyonly="true">USDT</cryptocurrency>
+                <cryptocurrency buyonly="true">USDC</cryptocurrency>
                 <help>Host should start with http:// or https://. num_blocks is an integer greater than 2.</help>
             </wallet>
             <wallet prefix="bitgonoforward" name="BitGo Wallet (no forward)">
@@ -65,6 +66,7 @@
                 <cryptocurrency>XRP</cryptocurrency><!-- BitGo Enterprise-->
                 <cryptocurrency>USDT</cryptocurrency><!-- BitGo Enterprise-->
                 <cryptocurrency>USDTTRON</cryptocurrency>
+                <cryptocurrency>USDC</cryptocurrency>
                 <help>This variant of the wallet generates new addresses for each sell transaction and does not forward payments from temporary address. Host should start with http:// or https://. num_blocks is an integer greater than 2.</help>
             </wallet>
             <wallet prefix="cryptx" name="CryptX Wallet System">
@@ -110,6 +112,7 @@
                 <cryptocurrency>ETH</cryptocurrency>
                 <cryptocurrency>TRX</cryptocurrency>
                 <cryptocurrency>USDT</cryptocurrency>
+                <cryptocurrency>USDC</cryptocurrency>
                 <cryptocurrency>USDTTRON</cryptocurrency>
                 <help>
                     *host: https://api.walletpro.cryptal.com/ (required) -
@@ -318,6 +321,14 @@
                 <param name="fiatcurrency" />
                 <cryptocurrency>BTC</cryptocurrency>
             </ratesource>
+            <ratesource prefix="okx" name="OKX Exchange" >
+                <param name="fiatcurrency" />
+                <cryptocurrency>BTC</cryptocurrency>
+                <cryptocurrency>DOGE</cryptocurrency>
+                <cryptocurrency>ETH</cryptocurrency>
+                <cryptocurrency>LTC</cryptocurrency>
+                <cryptocurrency>USDT</cryptocurrency>
+            </ratesource>
             <exchange prefix="bitflyer" name="BitFlyer.jp Exchange">
                 <param name="fiatcurrency" />
                 <param name="key" />
@@ -415,7 +426,7 @@
             <cryptocurrency>XRP</cryptocurrency>
             <help>fiatcurrency parameter is optional</help>
         </ratesource>
-        <wallet prefix="coinbasewallet2" name="Coinbase.com Wallet" >
+        <wallet prefix="coinbasewallet2" name="Coinbase.com Wallet [Deprecated]" >
             <param name="apikey" />
             <param name="secretkey" />
             <param name="accountname" />
@@ -432,7 +443,24 @@
             <cryptocurrency>XRP</cryptocurrency>
             <help>accountname parameter is optional</help>
         </wallet>
-        <wallet prefix="coinbasewallet2noforward" name="Coinbase.com Wallet (no forward)" >
+        <wallet prefix="coinbasewallet3" name="Coinbase.com Wallet" >
+            <param name="privatekey" />
+            <param name="keyname" />
+            <param name="accountname" />
+            <cryptocurrency>ADA</cryptocurrency>
+            <cryptocurrency>BAT</cryptocurrency>
+            <cryptocurrency buyonly="true">BCH</cryptocurrency>
+            <cryptocurrency>BTC</cryptocurrency>
+            <cryptocurrency>DASH</cryptocurrency>
+            <cryptocurrency buyonly="true">ETC</cryptocurrency>
+            <cryptocurrency buyonly="true">ETH</cryptocurrency>
+            <cryptocurrency buyonly="true">USDT</cryptocurrency>
+            <cryptocurrency buyonly="true">USDC</cryptocurrency>
+            <cryptocurrency>LTC</cryptocurrency>
+            <cryptocurrency>XRP</cryptocurrency>
+            <help>accountname parameter is optional</help>
+        </wallet>
+        <wallet prefix="coinbasewallet2noforward" name="Coinbase.com Wallet (no forward) [Deprecated]" >
             <param name="apikey" />
             <param name="secretkey" />
             <param name="accountname" />
@@ -450,7 +478,25 @@
             <cryptocurrency>XRP</cryptocurrency>
             <help>accountname parameter is optional. This variant of the wallet generates new addresses for each transaction and does not forward payments from temporary address</help>
         </wallet>
-        <exchange prefix="coinbaseexchange" name="Coinbase.com Exchange">
+        <wallet prefix="coinbasewallet3noforward" name="Coinbase.com Wallet (no forward)" >
+            <param name="privatekey" />
+            <param name="keyname" />
+            <param name="accountname" />
+            <cryptocurrency>ADA</cryptocurrency>
+            <cryptocurrency>BAT</cryptocurrency>
+            <cryptocurrency buyonly="true">BCH</cryptocurrency>
+            <cryptocurrency>BTC</cryptocurrency>
+            <cryptocurrency>DAI</cryptocurrency>
+            <cryptocurrency>BIZZ</cryptocurrency>
+            <cryptocurrency>ETC</cryptocurrency>
+            <cryptocurrency>ETH</cryptocurrency>
+            <cryptocurrency>USDT</cryptocurrency>
+            <cryptocurrency>USDC</cryptocurrency>
+            <cryptocurrency>LTC</cryptocurrency>
+            <cryptocurrency>XRP</cryptocurrency>
+            <help>accountname parameter is optional. This variant of the wallet generates new addresses for each transaction and does not forward payments from temporary address</help>
+        </wallet>
+        <exchange prefix="coinbaseexchange" name="Coinbase.com Exchange [Deprecated]">
             <param name="apikey" />
             <param name="secretkey" />
             <param name="accountname" />
@@ -465,16 +511,20 @@
             <cryptocurrency>BAT</cryptocurrency>
             <help>fiatcurrency,paymentmethod are optional</help>
         </exchange>
-        <exchange prefix="coinbasepro" name="Coinbase Pro">
-            <param name="key"/>
-            <param name="secret"/>
-            <param name="passphrase"/>
+        <exchange prefix="coinbaseexchange2" name="Coinbase.com Exchange">
+            <param name="privatekey" />
+            <param name="keyname" />
+            <param name="accountname" />
             <param name="fiatcurrency" />
+            <param name="paymentmethod" />
             <cryptocurrency>ADA</cryptocurrency>
             <cryptocurrency>BCH</cryptocurrency>
             <cryptocurrency>BTC</cryptocurrency>
+            <cryptocurrency buyonly="true">ETC</cryptocurrency>
             <cryptocurrency buyonly="true">ETH</cryptocurrency>
             <cryptocurrency>LTC</cryptocurrency>
+            <cryptocurrency>BAT</cryptocurrency>
+            <help>fiatcurrency,paymentmethod are optional</help>
         </exchange>
         <exchange prefix="poloniex" name="Poloniex">
             <param name="key"/>
@@ -499,15 +549,6 @@
             <cryptocurrency>XRP</cryptocurrency>
             <cryptocurrency>XPM</cryptocurrency>
         </exchange>
-        <ratesource prefix="coinbasepro" name="Coinbase Pro">
-            <param name="fiatcurrency" />
-            <cryptocurrency>ADA</cryptocurrency>
-            <cryptocurrency>BCH</cryptocurrency>
-            <cryptocurrency>BTC</cryptocurrency>
-            <cryptocurrency>ETH</cryptocurrency>
-            <cryptocurrency>LTC</cryptocurrency>
-            <cryptocurrency>XRP</cryptocurrency>
-        </ratesource>
         <ratesource prefix="poloniex" name="Poloniex">
             <param name="fiatcurrency" />
             <cryptocurrency>BCH</cryptocurrency>
@@ -1604,6 +1645,17 @@
             <param name="fiatcurrency" />
             <cryptocurrency>DEX</cryptocurrency>
         </exchange>
+        <exchange prefix="okx" name="OKX Exchange">
+            <param name="apikey" />
+            <param name="secretkey" />
+            <param name="passphrase" />
+            <param name="fiatcurrency" />
+            <cryptocurrency buyonly="true">BTC</cryptocurrency>
+            <cryptocurrency buyonly="true">DOGE</cryptocurrency>
+            <cryptocurrency buyonly="true">ETH</cryptocurrency>
+            <cryptocurrency buyonly="true">LTC</cryptocurrency>
+            <cryptocurrency buyonly="true">USDT</cryptocurrency>
+        </exchange>
         <cryptologo cryptocurrency="DEX" file="dex.png"/>
     </extension>
     <extension class="com.generalbytes.batm.server.extensions.extra.bitcore.BitcoreExtension" >
@@ -2373,4 +2425,5 @@
             <param sensitive="false" name="Onfido region" help="'EU', 'US' or 'CA'. Default: 'EU'."/>
         </identityverificationprovider>
     </extension>
+    <extension class="com.generalbytes.batm.server.extensions.travelrule.notabene.NotabeneExtension" />
 </extensions>

@@ -1,5 +1,5 @@
 /*************************************************************************************
- * Copyright (C) 2014-2024 GENERAL BYTES s.r.o. All rights reserved.
+ * Copyright (C) 2014-2025 GENERAL BYTES s.r.o. All rights reserved.
  *
  * This software may be distributed and modified under the terms of the GNU
  * General Public License version 2 (GPL2) as published by the Free Software
@@ -28,12 +28,18 @@ import com.generalbytes.batm.server.extensions.exceptions.BuyException;
 import com.generalbytes.batm.server.extensions.exceptions.CashbackException;
 import com.generalbytes.batm.server.extensions.exceptions.SellException;
 import com.generalbytes.batm.server.extensions.exceptions.UpdateException;
+import com.generalbytes.batm.server.extensions.travelrule.ITravelRuleProviderIdentification;
+import com.generalbytes.batm.server.extensions.travelrule.ITravelRuleTransferData;
+import com.generalbytes.batm.server.extensions.travelrule.IVaspIdentification;
 import com.generalbytes.batm.server.extensions.watchlist.WatchListQuery;
 import com.generalbytes.batm.server.extensions.watchlist.WatchListResult;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
+import java.nio.file.Path;
+import java.security.KeyStore;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -843,6 +849,28 @@ public interface IExtensionContext {
     String getConfigFileContent(final String fileNameInConfigDirectory);
 
     /**
+     * Load key store from config directory.
+     *
+     * @param keyStoreType Type of key store, for example: "PKCS12".
+     * @param filePath     File path relative to the config directory (typically "/batm/config"). The file must contain an extension.
+     * @param passphrase   Passphrase for access to key store. Can be {code null} if passphrase is not used.
+     * @return Key store object or {@code null} if error was occurred.
+     */
+    default KeyStore loadKeyStoreFromConfigDirectory(String keyStoreType, Path filePath, String passphrase) {
+        return null;
+    }
+
+    /**
+     * Load X.509 certificate from config directory.
+     *
+     * @param filePath File path relative to the config directory (typically "/batm/config"). The file must contain an extension.
+     * @return X.509 certificate or {@code null} if error was occurred.
+     */
+    default X509Certificate loadX509CertificateFromConfigDirectory(Path filePath) {
+        return null;
+    }
+
+    /**
      * @return true if the extension is running on global server.
      * Custom extensions will typically run on a standalone server, not global.
      */
@@ -891,4 +919,42 @@ public interface IExtensionContext {
      */
     ReceiptData getReceiptData(ReceiptTransferMethod receiptTransferMethod, ITransactionDetails transactionDetails, String template);
 
+    /**
+     * Returns the list of all configured Travel Rule Providers.
+     *
+     * @return List of all configured Travel Rule Providers.
+     */
+    default List<ITravelRuleProviderIdentification> getTravelRuleProviders() { return new ArrayList<>(); }
+
+    /**
+     * Returns the list of all VASPs of given Travel Rule Provider.
+     *
+     * @param travelRuleProviderId ID of Travel Rule Provider.
+     * @return List of all VASPs.
+     */
+    default List<IVaspIdentification> getVasps(long travelRuleProviderId) { return new ArrayList<>(); }
+
+    /**
+     * Adds a blockchain transaction hash to the transaction identified by the given remote transaction ID.
+     *
+     * <p>A single business-level transaction may correspond to multiple underlying blockchain transactions.
+     * This method allows additional hashes to be associated with the same transaction record.</p>
+     *
+     * @param transactionRemoteId the remote transaction ID identifying the transaction to update
+     * @param transactionHash     the blockchain transaction hash to add
+     * @return the updated transaction details after the hash is added
+     * @throws IllegalArgumentException if the remote id or hash is null or blank
+     * @throws UpdateException          if the transaction does not exist, or the update fails
+     */
+    ITransactionDetails addTransactionHash(String transactionRemoteId, String transactionHash) throws UpdateException;
+
+    /**
+     * Finds and returns travel rule transfer data associated with the given address.
+     *
+     * @param address the address to search for associated travel rule transfer data
+     * @return the travel rule transfer data associated with the given address, or {@code null} if no data is found
+     */
+    default ITravelRuleTransferData findTravelRuleTransferByAddress(String address) {
+        return null;
+    }
 }
