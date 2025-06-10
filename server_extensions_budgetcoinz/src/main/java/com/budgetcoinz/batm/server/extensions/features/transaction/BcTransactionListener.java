@@ -19,7 +19,7 @@ public class BcTransactionListener implements ITransactionListener {
         log.debug("BcTransactionListener entered for transaction " + transactionQueueRequest.getRemoteTransactionId());
 
         if(isStateMinnesota(transactionQueueRequest)){
-            log.debug("State is Minnessota, checking to see if is new customer");
+            log.debug("State is Minnesota, checking to see if is new customer");
             if(isNewMinnesotaCustomer(transactionQueueRequest.getIdentityPublicId())){
 
                 log.debug("Customer is new " + transactionQueueRequest.getIdentityPublicId());
@@ -37,10 +37,11 @@ public class BcTransactionListener implements ITransactionListener {
         }
         else if(isGeneralNewCustomer(transactionQueueRequest.getIdentityPublicId()))
         {
-            log.debug("State is NOT Minnessota and customer is new, inserting transaction into secondary queue");
+            log.debug("State is NOT Minnesota and customer is new, inserting transaction into secondary queue");
             outputQueueInsertConfig.setInsertIntoSecondaryQueue(true);
         }
 
+        log.debug("Customer is NOT Minnesota and NOT a new customer. Continuing to normal output queue configuration " + outputQueueInsertConfig);
         return outputQueueInsertConfig;
     }
 
@@ -72,11 +73,27 @@ public class BcTransactionListener implements ITransactionListener {
     }
 
     private boolean isGeneralNewCustomer(String identityPublicId) {
+        log.debug("Determining if " + identityPublicId + " is a new customer and getting transaction count");
         List<ITransactionDetails> transactions = ctx.findAllTransactionsByIdentityId(identityPublicId);
 
-        //add the + 1 to count the current transaction being executed in this listener
-        int totalTransactionCount = transactions.size() + 1;
+        if(transactions.size() + 1 == 1){
+            log.debug("Identity " + identityPublicId + " is a new customer. Transaction count is 1");
+            return true;
+        }
 
-        return totalTransactionCount <= 1;
+        ITransactionDetails earliestTransaction = transactions.stream()
+            .min(Comparator.comparing(ITransactionDetails::getServerTime))
+            .orElse(null);
+
+        if(earliestTransaction != null){
+            Date currentTime = new Date();
+            if(earliestTransaction.getServerTime().after(new Date(currentTime.getTime() - (24*60*60*1000L)))){
+                log.debug("Identity " + identityPublicId + " is a new customer. Earliest transaction is within the last 24 hours");
+                return true;
+            }
+        }
+
+        log.debug("Identity " + identityPublicId + " is not a new customer. Earliest transaction is not within the last 24 hours");
+        return false;
     }
 }
