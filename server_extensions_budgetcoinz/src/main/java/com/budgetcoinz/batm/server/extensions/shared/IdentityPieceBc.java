@@ -27,8 +27,8 @@ public class IdentityPieceBc implements IIdentityPiece {
     private final int type;
     private final String phoneNumber;
     private final String emailAddress;
-    private final String firstName;
-    private final String lastName;
+    private final String firstname;
+    private final String lastname;
     private final String idCardNumber;
     private final Integer documentType;
     private final Date documentValidTo;
@@ -38,7 +38,7 @@ public class IdentityPieceBc implements IIdentityPiece {
     private final String contactProvince;
     private final String contactCity;
     private final String contactAddress;
-    private final String fileName;
+    private final String filename;
     private final String mimeType;
     private final byte[] data;
     private final Date dateOfBirth;
@@ -46,14 +46,14 @@ public class IdentityPieceBc implements IIdentityPiece {
     private final String ssn;
     private final Date created;
 
-    IdentityPieceBc(int type, String phoneNumber, String emailAddress, String firstName, String lastName, String idCardNumber, Integer documentType, Date documentValidTo,
+    IdentityPieceBc(int type, String phoneNumber, String emailAddress, String firstname, String lastname, String idCardNumber, Integer documentType, Date documentValidTo,
                     String contactZIP, String contactCountry, String contactCountryIso2, String contactProvince, String contactCity, String contactAddress, Date dateOfBirth, String occupation, String ssn,
-                    String fileName, String mimeType, byte[] data, Date created) {
+                    String filename, String mimeType, byte[] data, Date created) {
         this.type = type;
         this.phoneNumber = phoneNumber;
         this.emailAddress = emailAddress;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.firstname = firstname;
+        this.lastname = lastname;
         this.idCardNumber = idCardNumber;
         this.documentType = documentType;
         this.documentValidTo = documentValidTo;
@@ -64,7 +64,7 @@ public class IdentityPieceBc implements IIdentityPiece {
         this.contactCity = contactCity;
         this.contactAddress = contactAddress;
         this.dateOfBirth = dateOfBirth;
-        this.fileName = fileName;
+        this.filename = filename;
         this.mimeType = mimeType;
         this.data = data;
         this.occupation = occupation;
@@ -124,6 +124,30 @@ public class IdentityPieceBc implements IIdentityPiece {
             identityPiece.getCreated());
     }
 
+    public static IdentityPieceBc fromIIdentityPiece(IIdentityPiece identityPiece){
+        return new IdentityPieceBc(identityPiece.getPieceType(),
+            identityPiece.getPhoneNumber(),
+            identityPiece.getEmailAddress(),
+            identityPiece.getFirstname(),
+            identityPiece.getLastname(),
+            identityPiece.getIdCardNumber(),
+            identityPiece.getDocumentType(),
+            identityPiece.getDocumentValidTo(),
+            identityPiece.getContactZIP(),
+            identityPiece.getContactCountry(),
+            identityPiece.getContactCountryIso2(),
+            identityPiece.getContactProvince(),
+            identityPiece.getContactCity(),
+            identityPiece.getContactAddress(),
+            identityPiece.getDateOfBirth(),
+            identityPiece.getOccupation(),
+            identityPiece.getSSN(),
+            identityPiece.getFilename(),
+            identityPiece.getMimeType(),
+            identityPiece.getData(),
+            identityPiece.getCreated());
+    }
+
     @Override
     public int getPieceType() {
         return type;
@@ -146,7 +170,7 @@ public class IdentityPieceBc implements IIdentityPiece {
 
     @Override
     public String getFilename() {
-        return fileName;
+        return filename;
     }
 
     @Override
@@ -161,12 +185,12 @@ public class IdentityPieceBc implements IIdentityPiece {
 
     @Override
     public String getFirstname() {
-        return firstName;
+        return firstname;
     }
 
     @Override
     public String getLastname() {
-        return lastName;
+        return lastname;
     }
 
     @Override

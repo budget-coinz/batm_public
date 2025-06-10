@@ -2,6 +2,7 @@ package com.budgetcoinz.batm.server.extensions.rest.identity;
 
 import com.budgetcoinz.batm.server.extensions.rest.BaseRestService;
 import com.budgetcoinz.batm.server.extensions.rest.identity.models.IdentityCreateModel;
+import com.budgetcoinz.batm.server.extensions.rest.identity.models.IdentityPersonalPieceInfoUpdateModel;
 import com.budgetcoinz.batm.server.extensions.rest.identity.models.IdentityUpdateModel;
 import com.budgetcoinz.batm.server.extensions.shared.ExtensionRestResponse;
 import com.budgetcoinz.batm.server.extensions.shared.IdentityPieceBc;
@@ -14,14 +15,113 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.lang.reflect.Field;
 
 @Path("/")
 public class IdentityRestService extends BaseRestService {
     protected final Logger log = LoggerFactory.getLogger("batm.master.budgetcoinz.IdentityRestService");
+    private ExtensionRestResponse extensionRestResponse = new ExtensionRestResponse();
+
+    @POST
+    @Path("/update/piecepersonalinfo/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Object UpdateIdentityPiecePersonalInfo(@HeaderParam("X-Api-Key") String apiKey, @PathParam("id") String publicId, String data) {
+        log.debug("POST /update/piecepersonalinfo/" + publicId + " called");
+
+        if(!canAccess(apiKey)){
+            return invalidApiKey;
+        }
+
+        try {
+            IdentityPersonalPieceInfoUpdateModel model = new ObjectMapper().readValue(data, IdentityPersonalPieceInfoUpdateModel.class);
+
+            IIdentity identity = ctx.findIdentityByIdentityId(publicId);
+
+            IdentityPieceBc personalInfoPiece = IdentityPieceBc.fromIIdentityPiece(Objects.requireNonNull(
+                identity.getIdentityPieces()
+                    .stream()
+                    .filter(piece -> piece.getPieceType() == IIdentityPiece.TYPE_PERSONAL_INFORMATION)
+                    .collect(Collectors.toList())
+                    .stream()
+                    .findFirst().orElse(null)));
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("Identity Updated via CAS REST Extension IdentityRestService (/update/piecepersonalinfo/" + publicId + ")\n");
+
+            boolean didUpdateHappen = false;
+
+            log.debug("Iterating through fields on the update model to see which values to update");
+            for(Field field : model.getClass().getDeclaredFields()){
+
+                field.setAccessible(true);
+                Object updateValue = field.get(model);
+
+                if(updateValue != null){
+
+                    Field mainField;
+
+                    try{
+                        mainField = personalInfoPiece.getClass().getDeclaredField(field.getName());
+                    }catch(NoSuchFieldException ex){
+                        continue;
+                    }
+
+                    mainField.setAccessible(true);
+                    Object mainValue = mainField.get(personalInfoPiece);
+
+                    if(!updateValue.equals(mainValue)){
+                        log.debug("Updating " + mainField.getName() + " from " + mainValue + " -> " + updateValue);
+                        sb.append(mainField.getName() + " from " + mainValue + " -> " + updateValue + "\n");
+                        mainField.set(personalInfoPiece, updateValue);
+                        didUpdateHappen = true;
+                    }
+                }
+            }
+
+            if(didUpdateHappen){
+                log.debug("Committing update to database");
+
+                ctx.updateIdentity(identity.getPublicId(),
+                    identity.getExternalId(),
+                    identity.getState(),
+                    identity.getType(),
+                    identity.getCreated(),
+                    identity.getRegistered(),
+                    identity.getVipBuyDiscount(),
+                    identity.getVipSellDiscount(),
+                    sb.toString(),
+                    identity.getLimitCashPerTransaction(),
+                    identity.getLimitCashPerHour(),
+                    identity.getLimitCashPerDay(),
+                    identity.getLimitCashPerWeek(),
+                    identity.getLimitCashPerMonth(),
+                    identity.getLimitCashPer3Months(),
+                    identity.getLimitCashPer12Months(),
+                    identity.getLimitCashPerCalendarQuarter(),
+                    identity.getLimitCashPerCalendarYear(),
+                    identity.getLimitCashTotalIdentity(),
+                    identity.getConfigurationCashCurrency());
+
+                ctx.updateIdentityPiecePersonalInfo(publicId, personalInfoPiece);
+
+                extensionRestResponse.setResultCode(200);
+                extensionRestResponse.setMessage("Successfully updated IdentityPiecePersonalInfo ");
+                extensionRestResponse.setData(personalInfoPiece);
+            }else{
+                extensionRestResponse.setResultCode(202);
+                extensionRestResponse.setMessage("No Piece Personal Info updates could be found for Identity " + publicId);
+                extensionRestResponse.setData(personalInfoPiece);
+            }
+
+            return extensionRestResponse;
+
+        }catch(Exception ex){
+            return invalidRequest(ex.getMessage());
+        }
+    }
 
     @POST
     @Path("/ssn/update")
