@@ -240,7 +240,7 @@ public class IdentityRestService extends BaseRestService {
 
             return new ExtensionRestResponse(200, "Successfully registered Identity", ctx.findIdentityByIdentityId(identity.getPublicId()));
         }catch (Exception ex){
-            return ex;
+            return new ExtensionRestResponse(500, "Error Creating Identity", ex.getMessage());
         }
     }
 }
